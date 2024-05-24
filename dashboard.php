@@ -1,4 +1,30 @@
-<?php include('auth.php'); ?>
+<?php
+session_start();
+include('db_config.php');
+
+// Verificar si el usuario ha iniciado sesión
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
+// Obtener los detalles del usuario
+$user_id = $_SESSION['user_id'];
+$sql = "SELECT u.username, u.role_id, r.role_name FROM users u JOIN roles r ON u.role_id = r.id WHERE u.id = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$user = $result->fetch_assoc();
+
+$username = $user['username'];
+$role_id = $user['role_id'];
+$role_name = $user['role_name'];
+
+$stmt->close();
+$conn->close();
+?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -10,50 +36,37 @@
 <body>
 
 <header class="container text-center py-4">
-    <h1>Dashboard</h1>
-    <nav>
-        <a href="logout.php" class="btn btn-danger">Cerrar Sesión</a>
-    </nav>
+    <h1>Bienvenido, <?php echo htmlspecialchars($username); ?> (<?php echo htmlspecialchars($role_name); ?>)</h1>
 </header>
 
 <main class="container">
-    <h2>Bienvenido, <?php echo $_SESSION['username']; ?></h2>
-    
-    <h3 class="mt-4">Registros de Horas</h3>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Empleado</th>
-                <th>Fecha</th>
-                <th>Entrada</th>
-                <th>Salida</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php
-            // Ejemplo de datos ficticios
-            $registros = [
-                ['id' => 1, 'empleado' => 'Juan Pérez', 'fecha' => '2024-05-20', 'entrada' => '08:00', 'salida' => '17:00'],
-                ['id' => 2, 'empleado' => 'Ana Gómez', 'fecha' => '2024-05-20', 'entrada' => '09:00', 'salida' => '18:00'],
-            ];
-
-            foreach ($registros as $registro) {
-                echo "<tr>
-                        <td>{$registro['id']}</td>
-                        <td>{$registro['empleado']}</td>
-                        <td>{$registro['fecha']}</td>
-                        <td>{$registro['entrada']}</td>
-                        <td>{$registro['salida']}</td>
-                    </tr>";
-            }
-            ?>
-        </tbody>
-    </table>
+    <div class="row">
+        <div class="col-md-3">
+            <nav class="nav flex-column bg-light p-3 rounded">
+                <a class="nav-link" href="profile.php">Perfil</a>
+                <a class="nav-link" href="timesheet.php">Control Horario</a>
+                <a class="nav-link" href="manage_users.php">Gestionar Usuarios</a>
+                <a class="nav-link" href="reports.php">Informes</a>
+                <a class="nav-link" href="settings.php">Configuraciones</a>
+                <a class="nav-link" href="logout.php">Cerrar Sesión</a>
+            </nav>
+        </div>
+        <div class="col-md-9">
+            <div class="content">
+                <h2>Dashboard</h2>
+                <p>Bienvenido al sistema de control horario.</p>
+                <!-- Aquí irán los contenidos específicos según el rol -->
+            </div>
+        </div>
+    </div>
 </main>
 
 <footer class="container text-center py-4 mt-5">
     <p>© 2024 Nombre de la Empresa</p>
+    <nav>
+        <a href="privacy_policy.php">Política de Privacidad</a>
+        <a href="terms_of_use.php">Términos de Uso</a>
+    </nav>
 </footer>
 
 </body>

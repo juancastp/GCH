@@ -29,6 +29,14 @@
                     <label for="password">Contraseña:</label>
                     <input type="password" id="password" name="password" class="form-control" required>
                 </div>
+                <div class="form-group">
+                    <label for="role">Rol:</label>
+                    <select id="role" name="role" class="form-control" required>
+                        <option value="1">Webmaster</option>
+                        <option value="2">Encargado</option>
+                        <option value="3">Empleado</option>
+                    </select>
+                </div>
                 <button type="submit" class="btn btn-primary btn-block">Registrarse</button>
             </form>
             <div class="mt-3 text-center">

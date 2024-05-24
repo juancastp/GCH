@@ -1,51 +1,9 @@
-<?php
-// Incluir el archivo de configuración de la base de datos
-include('db_config.php');
-
-// Comprobar si se ha enviado el formulario
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = $_POST['username'];
-    $password = $_POST['password'];
-    
-    // Consulta para verificar el usuario
-    $sql = "SELECT id, username, password FROM users WHERE username = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s", $username);
-    $stmt->execute();
-    $stmt->store_result();
-    
-    // Comprobar si el usuario existe
-    if ($stmt->num_rows > 0) {
-        $stmt->bind_result($id, $username, $hashed_password);
-        $stmt->fetch();
-        
-        // Verificar la contraseña
-        if (password_verify($password, $hashed_password)) {
-            // Contraseña correcta, iniciar sesión
-            session_start();
-            $_SESSION['username'] = $username;
-            $_SESSION['id'] = $id;
-            
-            // Redirigir al usuario a la página de inicio
-            header("Location: dashboard.php");
-            exit();
-        } else {
-            $error = "Contraseña incorrecta.";
-        }
-    } else {
-        $error = "Usuario no encontrado.";
-    }
-    $stmt->close();
-    $conn->close();
-}
-?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión - Control Horario</title>
+    <title>Inicio de Sesión - Control Horario</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
@@ -57,11 +15,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <main class="container">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <form action="login.php" method="post" class="bg-light p-4 rounded">
-                <h2 class="mb-4">Iniciar Sesión</h2>
+            <form action="authenticate.php" method="post" class="bg-light p-4 rounded">
+                <h2 class="mb-4">Inicio de Sesión</h2>
                 <?php
-                if (isset($error)) {
-                    echo '<div class="alert alert-danger">' . $error . '</div>';
+                if (isset($_GET['error'])) {
+                    echo '<div class="alert alert-danger">' . htmlspecialchars($_GET['error']) . '</div>';
                 }
                 ?>
                 <div class="form-group">
@@ -75,11 +33,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <button type="submit" class="btn btn-primary btn-block">Iniciar Sesión</button>
             </form>
             <div class="mt-3 text-center">
-                <a href="forgot_password.php">¿Olvidaste tu contraseña?</a>
-                <br>
-                <a href="signup.php">¿Necesitas una cuenta?</a>
-                <br>
-                <a href="contact.php">¿Necesitas ayuda?</a>
+                <a href="signup.php">¿No tienes una cuenta? Regístrate aquí</a>
             </div>
         </div>
     </div>

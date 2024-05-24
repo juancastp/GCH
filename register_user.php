@@ -6,6 +6,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST['username'];
     $email = $_POST['email'];
     $password = $_POST['password'];
+    $role_id = $_POST['role'];
 
     // Validación básica
     if (empty($username) || empty($email) || empty($password)) {
@@ -30,9 +31,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
                 // Insertar el usuario en la base de datos
-                $sql = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)";
+                $sql = "INSERT INTO users (username, email, password, role_id) VALUES (?, ?, ?, ?)";
                 $stmt = $conn->prepare($sql);
-                $stmt->bind_param("sss", $username, $email, $hashed_password);
+                $stmt->bind_param("sssi", $username, $email, $hashed_password, $role_id);
 
                 if ($stmt->execute()) {
                     // Redirigir al usuario a la página de inicio de sesión con un mensaje de éxito
@@ -87,6 +88,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <div class="form-group">
                     <label for="password">Contraseña:</label>
                     <input type="password" id="password" name="password" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="role">Rol:</label>
+                    <select id="role" name="role" class="form-control" required>
+                        <option value="1">Webmaster</option>
+                        <option value="2">Encargado</option>
+                        <option value="3">Empleado</option>
+                    </select>
                 </div>
                 <button type="submit" class="btn btn-primary btn-block">Registrarse</button>
             </form>
