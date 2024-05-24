@@ -43,6 +43,25 @@ $result = $conn->query($sql);
 </header>
 
 <main class="container">
+    <!-- Mostrar mensajes -->
+    <?php if (isset($_SESSION['message'])): ?>
+        <div class="alert alert-<?php echo $_SESSION['message_type']; ?> alert-dismissible fade show" role="alert">
+            <?php echo $_SESSION['message']; unset($_SESSION['message']); unset($_SESSION['message_type']); ?>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    <?php endif; ?>
+
+    <?php if (isset($_SESSION['error_message'])): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <?php echo $_SESSION['error_message']; unset($_SESSION['error_message']); ?>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    <?php endif; ?>
+
     <!-- Botón para agregar usuario -->
     <div class="row mb-3">
         <div class="col-md-12 text-right">
@@ -96,11 +115,11 @@ $result = $conn->query($sql);
                 <form action="add_user.php" method="post">
                     <div class="form-group">
                         <label for="username">Nombre de Usuario:</label>
-                        <input type="text" class="form-control" id="username" name="username" required>
+                        <input type="text" class="form-control" id="username" name="username" required <?php if(isset($_SESSION['error_username'])) echo 'value="' . htmlspecialchars($_SESSION['error_username']) . '"'; ?>>
                     </div>
                     <div class="form-group">
                         <label for="email">Email:</label>
-                        <input type="email" class="form-control" id="email" name="email" required>
+                        <input type="email" class="form-control" id="email" name="email" required <?php if(isset($_SESSION['error_email'])) echo 'value="' . htmlspecialchars($_SESSION['error_email']) . '"'; ?>>
                     </div>
                     <div class="form-group">
                         <label for="password">Contraseña:</label>
@@ -122,7 +141,13 @@ $result = $conn->query($sql);
 </div>
 
 <!-- Modal para editar usuario -->
-<?php while ($row = $result->fetch_assoc()): ?>
+<<?php
+// Ejecutar la consulta nuevamente para asegurar que tenemos todos los datos
+$result = $conn->query($sql);
+while ($row = $result->fetch_assoc()):
+    // Agrega esta línea para imprimir el contenido de $row
+    print_r($row);
+?>
 <div class="modal fade" id="editUserModal<?php echo $row['id']; ?>" tabindex="-1" role="dialog" aria-labelledby="editUserModalLabel<?php echo $row['id']; ?>" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -147,9 +172,9 @@ $result = $conn->query($sql);
                     <div class="form-group">
                         <label for="edit_role<?php echo $row['id']; ?>">Rol:</label>
                         <select class="form-control" id="edit_role<?php echo $row['id']; ?>" name="edit_role" required>
-                            <option value="1" <?php if ($row['role_name'] == 'Webmaster') echo 'selected'; ?>>Webmaster</option>
-                            <option value="2" <?php if ($row['role_name'] == 'Encargado') echo 'selected'; ?>>Encargado</option>
-                            <option value="3" <?php if ($row['role_name'] == 'Empleado') echo 'selected'; ?>>Empleado</option>
+                            <option value="1" <?php if ($row['role_id'] == 1) echo 'selected'; ?>>Webmaster</option>
+                            <option value="2" <?php if ($row['role_id'] == 2) echo 'selected'; ?>>Encargado</option>
+                            <option value="3" <?php if ($row['role_id'] == 3) echo 'selected'; ?>>Empleado</option>
                         </select>
                     </div>
                     <button type="submit" class="btn btn-primary">Guardar Cambios</button>
@@ -159,8 +184,12 @@ $result = $conn->query($sql);
     </div>
 </div>
 <?php endwhile; ?>
-<!-- Modal para confirmar eliminación de usuario -->
-<?php while ($row = $result->fetch_assoc()): ?>
+            
+<!-- Modal de confirmación de eliminación -->
+<?php
+$result = $conn->query($sql); // Ejecutar la consulta nuevamente para asegurar que tenemos todos los datos
+while ($row = $result->fetch_assoc()):
+?>
 <div class="modal fade" id="confirmDeleteModal<?php echo $row['id']; ?>" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel<?php echo $row['id']; ?>" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -171,23 +200,51 @@ $result = $conn->query($sql);
                 </button>
             </div>
             <div class="modal-body">
-                ¿Estás seguro de que deseas eliminar este usuario?
+                <p>¿Estás seguro de que deseas eliminar al usuario <strong><?php echo htmlspecialchars($row['username']); ?></strong>?</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                <form action="delete_user.php" method="post">
+                <form method="post" action="delete_user.php">
                     <input type="hidden" name="user_id" value="<?php echo $row['id']; ?>">
-                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                    <button type="submit" name="confirm_delete" class="btn btn-danger">Eliminar</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
+  <!-- Modal para mostrar mensaje de error -->
+  <?php if (isset($_SESSION['error_message'])): ?>
+    <div class="modal show" tabindex="-1" role="dialog" style="display: block;">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content bg-danger">
+                <div class="modal-header">
+                    <h5 class="modal-title">Error</h5>
+                    <a href="manage_users.php" class="close" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </a>
+                </div>
+                <div class="modal-body">
+                    <p><?php echo $_SESSION['error_message']; ?></p>
+                </div>
+                <div class="modal-footer">
+                    <a href="manage_users.php" class
+                    ="btn btn-secondary">Cerrar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
 <?php endwhile; ?>
 
-
-<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
+<script>
+$(document).ready(function() {
+    setTimeout(function() {
+        $(".alert").alert('close');
+    }, 5000);
+});
+</script>
 </body>
 </html>
