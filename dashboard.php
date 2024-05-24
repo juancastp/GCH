@@ -43,19 +43,31 @@ if ($role_id === null || $username === null || $email === null || $role_name ===
             <div class="row">
                 <div class="col-md-3">
                     <nav class="nav flex-column bg-light p-3 rounded">
-                        <a class="nav-link" href="profile.php">Perfil</a>
-                        <a class="nav-link" href="timesheet.php">Control Horario</a>
-                        <a class="nav-link" href="manage_users.php">Gestionar Usuarios</a>
-                        <a class="nav-link" href="reports.php">Informes</a>
-                        <a class="nav-link" href="settings.php">Configuraciones</a>
+                        <a class="nav-link" href="dashboard.php?page=profile">Perfil</a>
+                        <a class="nav-link" href="dashboard.php?page=timesheet">Control Horario</a>
+                        <?php if ($role_id == 1 || $role_id == 2): ?>
+                            <a class="nav-link" href="dashboard.php?page=manage_users">Gestionar Usuarios</a>
+                        <?php endif; ?>
+                        <a class="nav-link" href="dashboard.php?page=reports">Informes</a>
+                        <a class="nav-link" href="dashboard.php?page=settings">Configuraciones</a>
                         <a class="nav-link" href="logout.php">Cerrar Sesión</a>
                     </nav>
                 </div>
                 <div class="col-md-9">
                     <div class="content">
-                        <h2>Dashboard</h2>
-                        <p>Bienvenido al sistema de control horario.</p>
-                        <!-- Aquí irán los contenidos específicos según el rol -->
+                        <?php
+                        if (isset($_GET['page'])) {
+                            $page = $_GET['page'];
+                            $allowed_pages = array('profile', 'timesheet', 'manage_users', 'reports', 'settings');
+                            if (in_array($page, $allowed_pages)) {
+                                include($page . '.php');
+                            } else {
+                                echo "Página no encontrada.";
+                            }
+                        } else {
+                            echo "Bienvenido al dashboard.";
+                        }
+                        ?>
                     </div>
                 </div>
             </div>

@@ -18,11 +18,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->bind_param("ssii", $username, $email, $role_id, $user_id);
 
     if ($stmt->execute()) {
-        $_SESSION['flash_message'] = 'Usuario editado exitosamente';
-        $_SESSION['flash_message_type'] = 'warning';
+        $_SESSION['message'] = 'Usuario editado exitosamente';
+        $_SESSION['message_type'] = 'success';
     } else {
-        $_SESSION['flash_message'] = 'Error al editar el usuario';
-        $_SESSION['flash_message_type'] = 'danger';
+        $_SESSION['message'] = 'Error al editar el usuario';
+        $_SESSION['message_type'] = 'danger';
     }
 
     $stmt->close();

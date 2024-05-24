@@ -1,5 +1,4 @@
 <?php
-session_start();
 include('db_config.php');
 
 // Verificar si el usuario ha iniciado sesión
@@ -82,7 +81,7 @@ $result = $conn->query($sql);
                     </tr>
                 </thead>
                 <tbody>
-                    <?php while ($row = $result->fetch_assoc()): ?>
+                    <?php while ($row = $result->fetch_array()): ?>
                     <tr>
                         <td><?php echo htmlspecialchars($row['username']); ?></td>
                         <td><?php echo htmlspecialchars($row['email']); ?></td>
@@ -141,12 +140,10 @@ $result = $conn->query($sql);
 </div>
 
 <!-- Modal para editar usuario -->
-<<?php
+<?php
 // Ejecutar la consulta nuevamente para asegurar que tenemos todos los datos
 $result = $conn->query($sql);
-while ($row = $result->fetch_assoc()):
-    // Agrega esta línea para imprimir el contenido de $row
-    print_r($row);
+while ($row = $result->fetch_array()):
 ?>
 <div class="modal fade" id="editUserModal<?php echo $row['id']; ?>" tabindex="-1" role="dialog" aria-labelledby="editUserModalLabel<?php echo $row['id']; ?>" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -172,9 +169,9 @@ while ($row = $result->fetch_assoc()):
                     <div class="form-group">
                         <label for="edit_role<?php echo $row['id']; ?>">Rol:</label>
                         <select class="form-control" id="edit_role<?php echo $row['id']; ?>" name="edit_role" required>
-                            <option value="1" <?php if ($row['role_id'] == 1) echo 'selected'; ?>>Webmaster</option>
-                            <option value="2" <?php if ($row['role_id'] == 2) echo 'selected'; ?>>Encargado</option>
-                            <option value="3" <?php if ($row['role_id'] == 3) echo 'selected'; ?>>Empleado</option>
+                            <option value="1" <?php if ($row['role_name'] == 1) echo 'selected'; ?>>Webmaster</option>
+                            <option value="2" <?php if ($row['role_name'] == 2) echo 'selected'; ?>>Encargado</option>
+                            <option value="3" <?php if ($row['role_name'] == 3) echo 'selected'; ?>>Empleado</option>
                         </select>
                     </div>
                     <button type="submit" class="btn btn-primary">Guardar Cambios</button>
@@ -188,7 +185,7 @@ while ($row = $result->fetch_assoc()):
 <!-- Modal de confirmación de eliminación -->
 <?php
 $result = $conn->query($sql); // Ejecutar la consulta nuevamente para asegurar que tenemos todos los datos
-while ($row = $result->fetch_assoc()):
+while ($row = $result->fetch_array()):
 ?>
 <div class="modal fade" id="confirmDeleteModal<?php echo $row['id']; ?>" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel<?php echo $row['id']; ?>" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -212,8 +209,9 @@ while ($row = $result->fetch_assoc()):
         </div>
     </div>
 </div>
-  <!-- Modal para mostrar mensaje de error -->
-  <?php if (isset($_SESSION['error_message'])): ?>
+<?php endwhile; ?>
+<!-- Modal para mostrar mensaje de error -->
+<?php if (isset($_SESSION['error_message'])): ?>
     <div class="modal show" tabindex="-1" role="dialog" style="display: block;">
         <div class="modal-dialog" role="document">
             <div class="modal-content bg-danger">
@@ -227,14 +225,12 @@ while ($row = $result->fetch_assoc()):
                     <p><?php echo $_SESSION['error_message']; ?></p>
                 </div>
                 <div class="modal-footer">
-                    <a href="manage_users.php" class
-                    ="btn btn-secondary">Cerrar</a>
+                    <a href="manage_users.php" class="btn btn-secondary">Cerrar</a>
                 </div>
             </div>
         </div>
     </div>
 <?php endif; ?>
-<?php endwhile; ?>
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
@@ -243,7 +239,7 @@ while ($row = $result->fetch_assoc()):
 $(document).ready(function() {
     setTimeout(function() {
         $(".alert").alert('close');
-    }, 5000);
+    }, 3500);
 });
 </script>
 </body>
