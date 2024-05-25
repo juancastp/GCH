@@ -115,10 +115,11 @@ function loadRegisterHours() {
             document.getElementById("contentArea").innerHTML = this.responseText;
         }
     };
-    xhttp.open("GET", "register_hours.php", true);
+    xhttp.open("GET", "register_hours.php?role_id=<?php echo $role_id; ?>&user_id=<?php echo $user_id; ?>", true);
     xhttp.send();
 }
 </script>
+
 
 </body>
 </html>
