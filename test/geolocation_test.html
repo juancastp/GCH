@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba de Geolocalización</title>
+</head>
+<body>
+    <h1>Prueba de Geolocalización</h1>
+    <button id="getLocationBtn">Obtener Ubicación</button>
+    <p id="locationOutput"></p>
+    <p id="errorOutput" style="color: red;"></p>
+
+    <script>
+        document.getElementById('getLocationBtn').addEventListener('click', function () {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition, showError);
+            } else {
+                document.getElementById('errorOutput').textContent = "La geolocalización no es soportada por este navegador.";
+            }
+        });
+
+        function showPosition(position) {
+            var latitude = position.coords.latitude;
+            var longitude = position.coords.longitude;
+            document.getElementById('locationOutput').textContent = "Latitud: " + latitude + ", Longitud: " + longitude;
+            console.log("Geolocation success: ", latitude, longitude);
+        }
+
+        function showError(error) {
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    document.getElementById('errorOutput').textContent = "El usuario negó la solicitud de geolocalización.";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    document.getElementById('errorOutput').textContent = "La información de ubicación no está disponible.";
+                    break;
+                case error.TIMEOUT:
+                    document.getElementById('errorOutput').textContent = "La solicitud para obtener la ubicación del usuario ha caducado.";
+                    break;
+                case error.UNKNOWN_ERROR:
+                    document.getElementById('errorOutput').textContent = "Se ha producido un error desconocido.";
+                    break;
+            }
+            console.error("Geolocation error: ", error);
+        }
+    </script>
+</body>
+</html>

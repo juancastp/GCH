@@ -1,61 +1,96 @@
-// Código JavaScript para manejar los botones y el temporizador
-document.addEventListener("DOMContentLoaded", function() {
-    // Variables para el temporizador y estado
-    let timerInterval;
-    let startTime;
-    let elapsedTime = 0;
-    let timerRunning = false;
-    let pauseReason;
+document.addEventListener('DOMContentLoaded', function () {
+    var startWorkBtn = document.getElementById('startWorkBtn');
+    var pauseWorkBtn = document.getElementById('pauseWorkBtn');
+    var resumeWorkBtn = document.getElementById('resumeWorkBtn');
+    var stopWorkBtn = document.getElementById('stopWorkBtn');
+    var pauseReasonDiv = document.getElementById('pauseReasonDiv');
+    var timer = document.getElementById('timer');
+    var startTime;
+    var timerInterval;
 
-    // Obtener referencias a los elementos del DOM
-    const startButton = document.getElementById("startButton");
-    const pauseButton = document.getElementById("pauseButton");
-    const stopButton = document.getElementById("stopButton");
-    const timeRegistrationForm = document.getElementById("timeRegistrationForm");
-
-    // Evento click para el botón de inicio
-    startButton.addEventListener("click", function() {
-        if (!timerRunning) {
-            startTime = Date.now() - elapsedTime;
-            timerInterval = setInterval(updateTime, 1000);
-            timerRunning = true;
-            pauseButton.disabled = false;
-            stopButton.disabled = false;
-            // Aquí enviar solicitud de inicio al servidor
-            // Agregar lógica para inyectar datos en la base de datos con el comentario "inicio de jornada"
+    startWorkBtn.addEventListener('click', function () {
+        console.log("Start Work button clicked");
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function (position) {
+                var latitude = position.coords.latitude;
+                var longitude = position.coords.longitude;
+                console.log("Geolocation obtained: ", latitude, longitude);
+                handleRegister('inicio', latitude, longitude);
+                startTime = new Date();
+                startTimer();
+                startWorkBtn.disabled = true;
+                pauseWorkBtn.disabled = false;
+                stopWorkBtn.disabled = false;
+            }, function(error) {
+                console.error("Error obtaining geolocation: ", error);
+                document.getElementById('response').innerHTML = "Error obteniendo geolocalización: " + error.message;
+            });
+        } else {
+            console.error("Geolocation is not supported by this browser.");
+            document.getElementById('response').innerHTML = "La geolocalización no es soportada por este navegador.";
         }
     });
 
-    // Evento click para el botón de pausa
-    pauseButton.addEventListener("click", function() {
-        clearInterval(timerInterval);
-        timerRunning = false;
-        // Mostrar modal para solicitar motivo de pausa
-        $('#pauseModal').modal('show');
+    pauseWorkBtn.addEventListener('click', function () {
+        console.log("Pause Work button clicked");
+        pauseReasonDiv.classList.remove('d-none');
+        handleRegister('pausa', null, null, document.getElementById('pauseReason').value);
+        pauseWorkBtn.classList.add('d-none');
+        resumeWorkBtn.classList.remove('d-none');
+        stopTimer();
     });
 
-    // Evento click para el botón de detener
-    stopButton.addEventListener("click", function() {
-        clearInterval(timerInterval);
-        timerRunning = false;
-        elapsedTime = 0;
-        // Aquí enviar solicitud de parada al servidor
-        // Agregar lógica para inyectar datos en la base de datos con el comentario "fin de jornada"
-        timeRegistrationForm.submit(); // Esto enviará el formulario
+    resumeWorkBtn.addEventListener('click', function () {
+        console.log("Resume Work button clicked");
+        handleRegister('reinicio');
+        pauseReasonDiv.classList.add('d-none');
+        resumeWorkBtn.classList.add('d-none');
+        pauseWorkBtn.classList.remove('d-none');
+        startTime = new Date() - (new Date() - startTime);
+        startTimer();
     });
 
-    // Función para actualizar el temporizador
-    function updateTime() {
-        let currentTime = Date.now();
-        elapsedTime = currentTime - startTime;
-        // Aquí podrías actualizar la interfaz de usuario para mostrar el tiempo transcurrido
+    stopWorkBtn.addEventListener('click', function () {
+        console.log("Stop Work button clicked");
+        handleRegister('parada');
+        startWorkBtn.disabled = false;
+        pauseWorkBtn.disabled = true;
+        stopWorkBtn.disabled = true;
+        resumeWorkBtn.disabled = true;
+        stopTimer();
+    });
+
+    function handleRegister(action, latitude = null, longitude = null, pauseReason = '') {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'register_hours.php', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                console.log("Response received: ", xhr.responseText);
+                document.getElementById('response').innerHTML = xhr.responseText;
+            } else if (xhr.readyState === 4) {
+                console.error("Error in AJAX request: ", xhr.statusText);
+                document.getElementById('response').innerHTML = "Error en la solicitud AJAX: " + xhr.statusText;
+            }
+        };
+        var params = 'action=' + action + '&latitude=' + encodeURIComponent(latitude) + '&longitude=' + encodeURIComponent(longitude) + '&pauseReason=' + encodeURIComponent(pauseReason);
+        console.log("Sending request: ", params);
+        xhr.send(params);
     }
 
-    // Evento click para el botón de confirmar pausa en el modal
-    document.getElementById('confirmPauseButton').addEventListener('click', function() {
-        pauseReason = document.getElementById('pauseReason').value;
-        $('#pauseModal').modal('hide');
-        // Aquí enviar solicitud de pausa al servidor
-        // Agregar lógica para inyectar datos en la base de datos con el comentario de la pausa
-    });
+    function startTimer() {
+        timerInterval = setInterval(function () {
+            var currentTime = new Date();
+            var timeElapsed = new Date(currentTime - startTime);
+            var hours = timeElapsed.getUTCHours().toString().padStart(2, '0');
+            var minutes = timeElapsed.getUTCMinutes().toString().padStart(2, '0');
+            var seconds = timeElapsed.getUTCSeconds().toString().padStart(2, '0');
+            timer.textContent = `${hours}:${minutes}:${seconds}`;
+        }, 1000);
+    }
+
+    function stopTimer() {
+        clearInterval(timerInterval);
+        timer.textContent = '';
+    }
 });

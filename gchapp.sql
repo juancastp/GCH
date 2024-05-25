@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 24-05-2024 a las 20:38:14
--- Versión del servidor: 10.4.32-MariaDB
--- Versión de PHP: 8.2.12
+-- Tiempo de generación: 25-05-2024 a las 13:55:04
+-- Versión del servidor: 10.4.28-MariaDB
+-- Versión de PHP: 8.0.28
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -20,6 +20,21 @@ SET time_zone = "+00:00";
 --
 -- Base de datos: `gchapp`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `registros_horas`
+--
+
+CREATE TABLE `registros_horas` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `hora` timestamp NOT NULL DEFAULT current_timestamp(),
+  `latitud` decimal(10,8) DEFAULT NULL,
+  `longitud` decimal(11,8) DEFAULT NULL,
+  `comentario` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -61,16 +76,19 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `email`, `password`, `created_at`, `role_id`) VALUES
-(1, 'juanca', 'juanca@gchapp.es', '$2y$10$.WvvSsGuzOjPl3WJ0wwIRecfXHXYH8yWEYSrI3eikQVeAwAHLfyoG', '2024-05-23 18:10:16', NULL),
-(9, 'encargado2', 'encargado2@gechapp.es', '$2y$10$m7Beys2nyRy/1CZwFaZt.uxOUBoaX33LUMDzB6AXJnpqTn8DhpOOO', '2024-05-24 11:44:08', 2),
-(10, 'webmaster2', 'webmaster2@gechapp.es4', '$2y$10$HUt4NXR3zc5sFai6YI1VQeSvk4QfiJbun5UmV0WgNYWQ17rSBjUe.', '2024-05-24 16:04:42', 1),
-(11, 'webmaster3', 'webmaster3@gechapp.es', '$2y$10$ehB4O01oiffi3HZiwdOdvuXQ2QTCdOCJdFehTZ7YdykSwBMcbmAgO', '2024-05-24 16:14:07', 1),
 (13, 'webmaster', 'webmaster@gechapp.es', '$2y$10$YuT0twiEd9YNiX.pLdNuyOhEWlozcqZNBV9W1eBT/y/JQ8Uk3u0FW', '2024-05-24 16:24:26', 1),
-(14, 'juanca3', 'juancastp@gmail.com6', '$2y$10$THD3AXbO3MKvTZpM9fKv/O/xm2psdJECCZ3SzvkgqFbuqaPbAB3/.', '2024-05-24 16:24:59', 1);
+(18, 'juanca', 'juancastp@gmail.com', '$2y$10$vqQziWj0gxi7P1aqTf5rpufYM.XMOXBnJyb8ZSwH7oW/tlfKuOQ12', '2024-05-24 19:12:04', 1),
+(21, 'encargado', 'encargado@gechapp.es', '$2y$10$i/s/N1he.9he.Nh00HrQcujrR/KEORnRFrVCZXLMQ5pgrUAkZeqaK', '2024-05-25 08:39:00', 2);
 
 --
 -- Índices para tablas volcadas
 --
+
+--
+-- Indices de la tabla `registros_horas`
+--
+ALTER TABLE `registros_horas`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indices de la tabla `roles`
@@ -92,6 +110,12 @@ ALTER TABLE `users`
 --
 
 --
+-- AUTO_INCREMENT de la tabla `registros_horas`
+--
+ALTER TABLE `registros_horas`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT de la tabla `roles`
 --
 ALTER TABLE `roles`
@@ -101,7 +125,7 @@ ALTER TABLE `roles`
 -- AUTO_INCREMENT de la tabla `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- Restricciones para tablas volcadas
