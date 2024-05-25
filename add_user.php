@@ -42,12 +42,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Usuario insertado exitosamente, redirigir o mostrar un mensaje de éxito
         $_SESSION['message'] = "Usuario creado exitosamente.";
         $_SESSION['message_type'] = "success";
-        header("Location: manage_users.php");
+        header("Location: dashboard.php?page=manage_users");
         exit();
     } else {
         // Error al insertar el usuario
         $_SESSION['error_message'] = "Error al insertar el usuario.";
-        header("Location: manage_users.php");
+        header("Location: dashboard.php?page=manage_users");
         exit();
     }
 

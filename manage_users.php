@@ -33,12 +33,34 @@ $result = $conn->query($sql);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestionar Usuarios - Control Horario</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            margin-top: 5px; /* Reducir margen superior */
+        }
+        .table th, .table td {
+            vertical-align: middle;
+        }
+        .modal-header {
+            background-color: #007bff;
+            color: white;
+        }
+        .modal-footer .btn-primary {
+            background-color: #007bff;
+        }
+        header.container {
+            padding-top: 5px; /* Reducir padding superior */
+        }
+    </style>
 </head>
 <body>
 
-<header class="container text-center py-4">
-    <h1>Gestionar Usuarios</h1>
+<header class="container text-center py-2">
+    <h3>Gestionar Usuarios</h3>
 </header>
 
 <main class="container">
@@ -64,43 +86,44 @@ $result = $conn->query($sql);
     <!-- Botón para agregar usuario -->
     <div class="row mb-3">
         <div class="col-md-12 text-right">
-            <a href="#" class="btn btn-success" data-toggle="modal" data-target="#addUserModal">Agregar Usuario</a>
+            <a href="#" class="btn btn-success" data-toggle="modal" data-target="#addUserModal"><i class="bi bi-person-add"></i></a>
         </div>
     </div>
     
     <!-- Tabla de usuarios -->
     <div class="row">
         <div class="col-md-12">
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Nombre de Usuario</th>
-                        <th>Email</th>
-                        <th>Rol</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php while ($row = $result->fetch_array()): ?>
-                    <tr>
-                        <td><?php echo htmlspecialchars($row['username']); ?></td>
-                        <td><?php echo htmlspecialchars($row['email']); ?></td>
-                        <td><?php echo htmlspecialchars($row['role_name']); ?></td>
-                        <td>
-                            <a href="#" class="btn btn-warning" data-toggle="modal" data-target="#editUserModal<?php echo $row['id']; ?>">Editar</a>
-                            <a href="#" class="btn btn-danger" data-toggle="modal" data-target="#confirmDeleteModal<?php echo $row['id']; ?>">Eliminar</a>
-                        </td>
-                    </tr>
-                    <?php endwhile; ?>
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Nombre de Usuario</th>
+                            <th>Email</th>
+                            <th>Rol</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php while ($row = $result->fetch_array()): ?>
+                        <tr>
+                            <td><?php echo htmlspecialchars($row['username']); ?></td>
+                            <td><?php echo htmlspecialchars($row['email']); ?></td>
+                            <td><?php echo htmlspecialchars($row['role_name']); ?></td>
+                            <td>
+                                <a href="#" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editUserModal<?php echo $row['id']; ?>"><i class="bi bi-pencil-square"></i></a>
+                                <a href="#" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#confirmDeleteModal<?php echo $row['id']; ?>"><i class="bi bi-trash3"></i></a>
+                            </td>
+                        </tr>
+                        <?php endwhile; ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </main>
 
 <!-- Modal para agregar usuario -->
 <div class="modal fade" id="addUserModal" tabindex="-1" role="dialog" aria-labelledby="addUserModalLabel" aria-hidden="true">
-    <!-- Contenido del modal -->
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -110,7 +133,6 @@ $result = $conn->query($sql);
                 </button>
             </div>
             <div class="modal-body">
-                <!-- Formulario para agregar usuario -->
                 <form action="add_user.php" method="post">
                     <div class="form-group">
                         <label for="username">Nombre de Usuario:</label>
@@ -141,8 +163,7 @@ $result = $conn->query($sql);
 
 <!-- Modal para editar usuario -->
 <?php
-// Ejecutar la consulta nuevamente para asegurar que tenemos todos los datos
-$result = $conn->query($sql);
+$result = $conn->query($sql); // Ejecutar la consulta nuevamente para asegurar que tenemos todos los datos
 while ($row = $result->fetch_array()):
 ?>
 <div class="modal fade" id="editUserModal<?php echo $row['id']; ?>" tabindex="-1" role="dialog" aria-labelledby="editUserModalLabel<?php echo $row['id']; ?>" aria-hidden="true">
@@ -155,11 +176,10 @@ while ($row = $result->fetch_array()):
                 </button>
             </div>
             <div class="modal-body">
-                <!-- Aquí va el formulario para editar usuario -->
                 <form action="edit_user.php" method="post">
                     <input type="hidden" name="user_id" value="<?php echo $row['id']; ?>">
                     <div class="form-group">
-                        <label for="edit_username">Nombre de Usuario:</label>
+                        <label for="edit_username<?php echo $row['id']; ?>">Nombre de Usuario:</label>
                         <input type="text" class="form-control" id="edit_username<?php echo $row['id']; ?>" name="edit_username" value="<?php echo htmlspecialchars($row['username']); ?>" required>
                     </div>
                     <div class="form-group">
@@ -181,7 +201,7 @@ while ($row = $result->fetch_array()):
     </div>
 </div>
 <?php endwhile; ?>
-            
+
 <!-- Modal de confirmación de eliminación -->
 <?php
 $result = $conn->query($sql); // Ejecutar la consulta nuevamente para asegurar que tenemos todos los datos
@@ -210,14 +230,15 @@ while ($row = $result->fetch_array()):
     </div>
 </div>
 <?php endwhile; ?>
+
 <!-- Modal para mostrar mensaje de error -->
 <?php if (isset($_SESSION['error_message'])): ?>
     <div class="modal show" tabindex="-1" role="dialog" style="display: block;">
         <div class="modal-dialog" role="document">
-            <div class="modal-content bg-danger">
+            <div class="modal-content bg-danger text-white">
                 <div class="modal-header">
                     <h5 class="modal-title">Error</h5>
-                    <a href="manage_users.php" class="close" aria-label="Close">
+                    <a href="manage_users.php" class="close text-white" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </a>
                 </div>

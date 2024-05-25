@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['confirm_delete'])) {
     // Redirigir con un mensaje de éxito
     $_SESSION['message'] = "Usuario eliminado exitosamente.";
     $_SESSION['message_type'] = "success";
-    header("Location: manage_users.php");
+    header("Location: dashboard.php?page=manage_users");
     exit();
 }
 ?>

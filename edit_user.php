@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     $stmt->close();
-    header("Location: manage_users.php");
+    header("Location: dashboard.php?page=manage_users");
     exit();
 }
 ?>
