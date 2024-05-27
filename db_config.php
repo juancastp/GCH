@@ -1,14 +1,17 @@
 <?php
 $servername = "localhost";
-$username = "sagch"; // Cambia esto si tienes otro usuario
-$password = "cMBbRYP4C][IrhCQ"; // Cambia esto si tienes una contraseña
-$dbname = "gchapp"; // Asegúrate de que este sea el nombre de tu base de datos
+$username = "sagch";
+$password = "cMBbRYP4C][IrhCQ";
+$dbname = "gchapp";
 
 // Crear conexión
 $conn = new mysqli($servername, $username, $password, $dbname);
 
-// Comprobar conexión
+// Verificar conexión
 if ($conn->connect_error) {
     die("Conexión fallida: " . $conn->connect_error);
 }
 ?>
+
+
+<
