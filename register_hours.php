@@ -20,33 +20,37 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $stmt->execute();
                 echo "Inicio de jornada registrado.";
                 break;
-
-            // Casos para 'pausa', 'reinicio' y 'parada'...
-
-            
-
-
+                
             case 'pausa':
-                $comment = "Pausa por ";
                 $pauseReason = $_POST['pauseReason'];
-                $comment .= $pauseReason;
+                $comment = "Pausa iniciada - Motivo: " . $pauseReason;
                 $sql = "INSERT INTO registros_horas (user_id, hora, comentario, latitude, longitude) VALUES (?, ?, ?, ?, ?)";
                 $stmt = $conn->prepare($sql);
                 $stmt->bind_param("issdd", $userId, $currentTime, $comment, $latitude, $longitude);
                 $stmt->execute();
-                echo "Pausa registrada.";
+                echo "Pausa iniciada.";
                 break;
+
+                case 'reinicio':
+                    $continueReason = "Fin de la pausa";
+                    $comment = "Fin de pausa - Motivo: " . $continueReason;
+                    $sql = "INSERT INTO registros_horas (user_id, hora, comentario, latitude, longitude) VALUES (?, ?, ?, ?, ?)";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bind_param("issdd", $userId, $currentTime, $comment, $latitude, $longitude);
+                    $stmt->execute();
+                    echo "Fin de pausa registrado.";
+                    break;
 
             case 'parada':
-                $comment = "Parada";
+                $comment = "Fin de jornada";
                 $sql = "INSERT INTO registros_horas (user_id, hora, comentario, latitude, longitude) VALUES (?, ?, ?, ?, ?)";
                 $stmt = $conn->prepare($sql);
                 $stmt->bind_param("issdd", $userId, $currentTime, $comment, $latitude, $longitude);
                 $stmt->execute();
-                echo "Parada registrada.";
+                echo "Fin de jornada registrado.";
                 break;
 
-                default:
+            default:
                 echo "Acción no válida.";
                 break;
         }
@@ -58,7 +62,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 ?>
 
 
-<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -73,6 +76,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div id="time-counter" class="mb-3"></div>
     <div>
         <button id="startButton" class="btn btn-primary" onclick="startWork()">Iniciar Jornada</button>
+        <button id="continueButton" class="btn btn-success" onclick="continueWork()" disabled>Continuar Jornada</button>
         <button id="pauseButton" class="btn btn-warning" onclick="pauseWork()" disabled>Pausa</button>
         <button id="stopButton" class="btn btn-danger" onclick="stopWork()" disabled>Parada</button>
     </div>
@@ -82,6 +86,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <script>
 let startTime;
 let timerInterval;
+let pausedTime = 0;
 
 function startWork() {
     console.log("startWork() called");
@@ -123,7 +128,7 @@ function startTimer() {
     console.log("startTimer() called");
     timerInterval = setInterval(function() {
         const now = new Date();
-        const elapsedTime = now - startTime;
+        const elapsedTime = now - startTime + pausedTime;
         const hours = Math.floor(elapsedTime / 3600000);
         const minutes = Math.floor((elapsedTime % 3600000) / 60000);
         const seconds = Math.floor((elapsedTime % 60000) / 1000);
@@ -138,68 +143,61 @@ function pauseWork() {
     console.log("pauseWork() called");
     const pauseReason = prompt("Escriba el motivo de la pausa:");
     if (pauseReason !== null && pauseReason !== "") {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function(position) {
-                const latitude = position.coords.latitude;
-                const longitude = position.coords.longitude;
-                const xhr = new XMLHttpRequest();
-                xhr.open("POST", "register_hours.php", true);
-                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                xhr.onreadystatechange = function() {
-                    if (xhr.readyState == 4) {
-                        if (xhr.status == 200) {
-                            console.log("Response from server: " + xhr.responseText);
-                            clearInterval(timerInterval);
-                            document.getElementById("startButton").disabled = false;
-                            document.getElementById("pauseButton").disabled = true;
-                            document.getElementById("stopButton").disabled = false;
-                        } else {
-                            console.error("AJAX request failed with status: " + xhr.status);
-                        }
-                    }
-                };
-                xhr.send("action=pausa&latitude=" + latitude + "&longitude=" + longitude + "&pauseReason=" + encodeURIComponent(pauseReason));
-            }, function(error) {
-                console.error("Geolocation error: " + error.message);
-            });
-        } else {
-            console.error("Geolocation not supported by this browser.");
-        }
+        clearInterval(timerInterval);
+        pausedTime += new Date() - startTime;
+        document.getElementById("startButton").style.display = "none";
+        document.getElementById("continueButton").disabled = false;
+        document.getElementById("pauseButton").disabled = true;
+        document.getElementById("stopButton").disabled = false;
     }
 }
 
-
 function stopWork() {
     console.log("stopWork() called");
-    // Implementar funcionalidad de paradaconsole.log("stopWork() called");
+    clearInterval(timerInterval);
+    document.getElementById("startButton").disabled = false;
+    document.getElementById("pauseButton").disabled = true;
+    document.getElementById("stopButton").disabled = true;
+    document.getElementById("continueButton").disabled = true;
+    document.getElementById("time-counter").textContent = "00:00:00";
+    startTime = null;
+    pausedTime = 0;
+}
+
+function continueWork() {
+    console.log("continueWork() called");
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function(position) {
+            console.log("Geolocation success");
             const latitude = position.coords.latitude;
             const longitude = position.coords.longitude;
+
             const xhr = new XMLHttpRequest();
             xhr.open("POST", "register_hours.php", true);
             xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
             xhr.onreadystatechange = function() {
                 if (xhr.readyState == 4) {
+                    console.log("AJAX request state: " + xhr.readyState);
                     if (xhr.status == 200) {
                         console.log("Response from server: " + xhr.responseText);
-                        clearInterval(timerInterval);
-                        document.getElementById("startButton").disabled = false;
-                        document.getElementById("pauseButton").disabled = true;
-                        document.getElementById("stopButton").disabled = true;
-                        document.getElementById("time-counter").textContent = "00:00:00";
+                        document.getElementById("pauseButton").disabled = false;
+                        document.getElementById("stopButton").disabled = false;
+                        document.getElementById("continueButton").disabled = true;
+                        startTime = new Date();
+                        startTimer();
                     } else {
                         console.error("AJAX request failed with status: " + xhr.status);
-}
-}
-};
-xhr.send("action=parada&latitude=" + latitude + "&longitude=" + longitude);
-}, function(error) {
-console.error("Geolocation error: " + error.message);
-});
-} else {
-console.error("Geolocation not supported by this browser.");
-}
+                    }
+                }
+            };
+            console.log("Sending AJAX request with data: " + "action=continuar&latitude=" + latitude + "&longitude=" + longitude);
+            xhr.send("action=continuar&latitude=" + latitude + "&longitude=" + longitude);
+        }, function(error) {
+            console.error("Geolocation error: " + error.message);
+        });
+    } else {
+        console.error("Geolocation not supported by this browser.");
+    }
 }
 
 </script>
